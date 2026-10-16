@@ -1,0 +1,20 @@
+{
+  "solutions": [],
+  "projects": [
+    {
+      "name": "demucs-stem-server",
+      "path": ".",
+      "group": "",
+      "ecosystem": "Python",
+      "in_solution": null,
+      "duplicate_name": false,
+      "inferred": false
+    }
+  ],
+  "orphan_projects": [],
+  "duplicate_project_names": [],
+  "folders": [
+    "architecture-docs",
+    "output"
+  ]
+}

@@ -1,0 +1,143 @@
+{
+  "system": {
+    "name": "demucs-stem-server",
+    "description": "Local FastAPI service that receives audio uploads and separates them into Demucs stems for download"
+  },
+  "people": [
+    {
+      "id": "audio-operator",
+      "name": "Audio operator",
+      "description": "Uploads a track to request instrument and vocal stems",
+      "assumption": true
+    }
+  ],
+  "containers": [
+    {
+      "id": "demucs-stem-server",
+      "name": "demucs-stem-server",
+      "technology": "Python, FastAPI",
+      "description": "HTTP API that validates uploads, loads Demucs models, separates tracks into stems, and returns ZIP or single-stem audio files",
+      "evidence": [
+        "server.py:27-28",
+        "server.py:42-77",
+        "server.py:128-147",
+        "server.py:218-270"
+      ]
+    }
+  ],
+  "external_systems": [
+    {
+      "id": "music-stem-separator-ios",
+      "name": "Music Stem Separator iOS app",
+      "description": "Client that calls the server to separate songs and download stems",
+      "evidence": [
+        "README.md:3-7"
+      ]
+    }
+  ],
+  "relationships": [
+    {
+      "from": "audio-operator",
+      "to": "demucs-stem-server",
+      "description": "Uploads a song and requests stem separation using",
+      "technology": "HTTPS/JSON",
+      "assumption": true
+    },
+    {
+      "from": "music-stem-separator-ios",
+      "to": "demucs-stem-server",
+      "description": "Requests separated audio from",
+      "technology": "HTTPS/JSON"
+    }
+  ],
+  "components": {
+    "demucs-stem-server": {
+      "demucs-stem-server": "FastAPI upload endpoints and in-memory Demucs pipeline for model loading, audio separation, and ZIP output"
+    }
+  },
+  "flows": [
+    {
+      "id": "upload-separate-stems",
+      "name": "Audio operator separates a track into stems",
+      "description": "Uploads a source audio file, runs Demucs, and downloads the zipped stems.",
+      "steps": [
+        {
+          "from": "audio-operator",
+          "to": "demucs-stem-server",
+          "description": "POST /separate with the source file",
+          "technology": "HTTPS",
+          "evidence": [
+            "server.py:218-266"
+          ]
+        },
+        {
+          "from": "demucs-stem-server",
+          "to": "demucs-stem-server",
+          "description": "Load or reuse the Demucs model and separate audio into stems",
+          "technology": "PyTorch / Demucs",
+          "evidence": [
+            "server.py:42-77",
+            "server.py:84-125"
+          ]
+        },
+        {
+          "from": "demucs-stem-server",
+          "to": "audio-operator",
+          "description": "Returns a ZIP containing drums, bass, other and vocals",
+          "reply": true,
+          "technology": "application/zip",
+          "evidence": [
+            "server.py:218-266",
+            "server.py:127-147"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "stream-single-stem",
+      "name": "Download a single stem",
+      "description": "Request one stem from the API for direct playback or export.",
+      "steps": [
+        {
+          "from": "music-stem-separator-ios",
+          "to": "demucs-stem-server",
+          "description": "POST /separate/stream with the file and selected stem",
+          "technology": "HTTPS",
+          "evidence": [
+            "server.py:270-327"
+          ]
+        },
+        {
+          "from": "demucs-stem-server",
+          "to": "music-stem-separator-ios",
+          "description": "Returns the selected audio stem as WAV, MP3 or FLAC",
+          "reply": true,
+          "technology": "audio/*",
+          "evidence": [
+            "server.py:270-327"
+          ]
+        }
+      ]
+    }
+  ],
+  "code": [
+    {
+      "container": "demucs-stem-server",
+      "component": "demucs-stem-server",
+      "description": "FastAPI upload endpoints, Demucs model loading, and stem packaging logic used in every request.",
+      "types": []
+    }
+  ],
+  "summary": {
+    "overview": "demucs-stem-server is a local Python FastAPI service that accepts uploaded audio files and separates them into individual stems using the Demucs ML models. The system is intentionally self-contained: it runs as one container, serves HTTP endpoints, loads models into memory, and returns ZIP archives or single-stem audio files without relying on a separate data store.",
+    "findings": [
+      "The API exposes unauthenticated HTTP endpoints for health checks, model listing, full-stem export, and single-stem streaming (`server.py:200-327`), so anyone with network access to the service can invoke the separation pipeline.",
+      "The server keeps Demucs models in memory across requests (`server.py:42-77`), which reduces latency but also makes startup and memory cost proportional to the loaded model size.",
+      "The container is built as a single service (`Dockerfile:1-17`) and does not define any persistence layer or downstream data store, which matches the repository's local-processing design."
+    ],
+    "recommendations": [
+      "Place the service behind an authenticated reverse proxy or firewall when it is exposed beyond a private local network, because the upload endpoints are public by default (`server.py:200-327`).",
+      "Consider explicit GPU or memory sizing in deployment if model caching is expected to handle concurrent users, since the service preloads and keeps models in memory (`server.py:42-77`)."
+    ]
+  }
+}

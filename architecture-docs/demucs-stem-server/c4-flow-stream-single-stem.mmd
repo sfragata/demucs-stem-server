@@ -1,0 +1,8 @@
+---
+title: "Download a single stem"
+---
+sequenceDiagram
+    participant music_stem_separator_ios as Music Stem Separator iOS app
+    participant demucs_stem_server as demucs-stem-server
+    music_stem_separator_ios->>demucs_stem_server: POST /separate/stream with the file and selected stem [HTTPS]
+    demucs_stem_server-->>music_stem_separator_ios: Returns the selected audio stem as WAV, MP3 or FLAC [audio/*]

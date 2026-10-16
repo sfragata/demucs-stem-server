@@ -1,0 +1,44 @@
+{
+  "repository": "demucs-stem-server",
+  "technology_stack": [
+    "Python"
+  ],
+  "projects_found": 1,
+  "inferred_projects": [],
+  "folders_found": 2,
+  "components_found": 1,
+  "dependencies_found": 0,
+  "test_projects": [],
+  "orphan_projects": [],
+  "duplicate_project_names": [],
+  "unresolved_references": [],
+  "cycles": [],
+  "untested_projects": [],
+  "dependency_graph_available": true,
+  "status": "ok",
+  "warnings": [],
+  "skipped_files": [],
+  "c4": {
+    "containers": 1,
+    "data_stores": 0,
+    "external_systems": 0,
+    "diagrams": [
+      "c4-container"
+    ],
+    "model": "facts-only",
+    "model_errors": [],
+    "model_warnings": [],
+    "model_status": "ok",
+    "drift": [],
+    "svg": {
+      "dependency-graph": {
+        "status": "ok",
+        "message": ""
+      },
+      "c4-container": {
+        "status": "ok",
+        "message": ""
+      }
+    }
+  }
+}

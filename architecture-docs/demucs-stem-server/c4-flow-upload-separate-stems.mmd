@@ -1,0 +1,9 @@
+---
+title: "Audio operator separates a track into stems"
+---
+sequenceDiagram
+    actor audio_operator as Audio operator
+    participant demucs_stem_server as demucs-stem-server
+    audio_operator->>demucs_stem_server: POST /separate with the source file [HTTPS]
+    demucs_stem_server->>demucs_stem_server: Load or reuse the Demucs model and separate audio into stems [PyTorch / Demucs]
+    demucs_stem_server-->>audio_operator: Returns a ZIP containing drums, bass, other and vocals [application/zip]

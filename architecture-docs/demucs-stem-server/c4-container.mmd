@@ -1,0 +1,21 @@
+---
+title: "demucs-stem-server · Containers"
+---
+flowchart TB
+    audio_operator("Audio operator<br/>[Person]<br/>Uploads a track to request<br/>instrument and vocal stems")
+    subgraph boundary["demucs-stem-server [Software System]"]
+        demucs_stem_server["demucs-stem-server<br/>[Container: Python, FastAPI]<br/>HTTP API that validates uploads,<br/>loads Demucs models, separates<br/>tracks into stems, and returns ZIP<br/>or single-stem audio files"]
+    end
+    music_stem_separator_ios["Music Stem Separator iOS app<br/>[Software System]<br/>Client that calls the server to<br/>separate songs and download stems"]
+    audio_operator -->|"Uploads a song and requests<br/>stem separation using<br/>[HTTPS/JSON]"| demucs_stem_server
+    music_stem_separator_ios -->|"Requests separated audio<br/>from<br/>[HTTPS/JSON]"| demucs_stem_server
+    classDef person fill:#08427b,stroke:#052e56,color:#ffffff
+    classDef container fill:#1168bd,stroke:#0b4884,color:#ffffff
+    classDef system fill:#1168bd,stroke:#0b4884,color:#ffffff
+    classDef component fill:#85bbf0,stroke:#5d82a8,color:#000000
+    classDef external fill:#999999,stroke:#6b6b6b,color:#ffffff
+    classDef shared fill:#dbe9f6,stroke:#5d82a8,color:#000000,stroke-dasharray:4 3
+    class audio_operator person
+    class demucs_stem_server container
+    class music_stem_separator_ios external
+    style boundary fill:none,stroke:#444444,stroke-dasharray:6 4
